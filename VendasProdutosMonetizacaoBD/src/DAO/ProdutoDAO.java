@@ -14,22 +14,22 @@ public class ProdutoDAO {
     public static void inserirProduto(String nome,double preco,int qtd) throws SQLException{
         stm = CON.prepareStatement("SELECT INSERIR_PRODUTOS(?,?,?);");
         stm.setString(1, nome);stm.setDouble(2, preco);stm.setInt(3, qtd);
-        stm.executeUpdate();
+        stm.execute();
     }
     
     public static void deletarProduto(String nome) throws SQLException{
         stm = CON.prepareStatement("SELECT DELETAR_PRODUTOS(?)");
         stm.setString(1, nome);
-        stm.executeUpdate();
+        stm.execute();
     }
     
-    public static int getIDProduto(String nome) throws SQLException{
+    public static Integer getIDProduto(String nome) throws SQLException{
         stm = CON.prepareStatement("SELECT CODIGO FROM PRODUTO WHERE NOME = $1;");
         resultado = stm.executeQuery();
         while(resultado.next()){
             return resultado.getInt(1);
         }
-        return 0;
+        return null;
     }
     
 }
