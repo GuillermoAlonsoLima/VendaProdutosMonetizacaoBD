@@ -1,20 +1,81 @@
 package DAO;
 
 import Conexao.Conexao;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/** ClienteDAO
+ * Executa comandos sql relacionados a tabela Cliente.
+ * @author Guillermo1
+ */
 public class ClienteDAO {
-    private static PreparedStatement stm;
-    private static final Connection CON = Conexao.getCon();
-    private static ResultSet resultado; 
+    private static ResultSet selecao;
     
-    public void inserirCliente(String cpf,String nome,String email) throws SQLException{
-        stm = CON.prepareStatement("SELECT INSERIR_CLIENTE(?,?,?);");
-        stm.setString(1, cpf);stm.setString(2, nome);stm.setString(3, email);
-        stm.executeUpdate();
+    /** cadastrar
+     *  Cadastra o cliente
+     * @param cpf
+     * @param nome
+     * @param email
+     */
+    public static void cadastrar(String cpf,String nome,String email){
+        try{
+            Conexao.executar("INSERT INTO CLIENTE VALUES('"+cpf+"','"+nome+"','"+email+"');");
+        }catch(Exception ex){
+            System.out.println("Cliente já existe!");
+        }
     }
     
+    /** deletar
+     * Deleta o cliente
+     * @param coluna referencia para deletar
+     * @param valor valor de referencia para deletar
+     */
+    public static void deletar(String coluna,String valor){
+        Conexao.executar("DELETE FROM CLIENTE WHERE "+coluna+" = '"+valor+"';");
+    }
+    
+    /** atualizar
+     * atualiza o cliente
+     * @param coluna1 coluna a atualizar
+     * @param valor1 novo valor da coluna
+     * @param coluna2 referencia para atualizar
+     * @param valor2 valor da referencia para atualizar
+     */
+    public static void atualizar(String coluna1,String valor1,String coluna2,String valor2){
+        Conexao.executar("UPDATE CLIENTE SET "+coluna1+" = '"+valor1+"' WHERE "+coluna2+" = '"+valor2+"';");
+    }    
+    
+    /** selecionar
+     * seleciona o cliente
+     * @param coluna coluna a selecionar
+     * @param valor valor a selecionar
+     */
+    public static void selecionar(String coluna,String valor){
+        selecao = Conexao.selecionar("SELECT * FROM CLIENTE WHERE "+coluna+" = '"+valor+"';");
+        try {
+            while(selecao.next()){
+                System.out.println("CPF:"+selecao.getString(1)+","
+                        + "Nome:"+selecao.getString(2)+","
+                        + "E-mail:"+selecao.getString(3)+";");
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    /** selecionarTudo
+     * seleciona todos os clientes
+     */
+    public static void selecionarTudo(){
+        selecao = Conexao.selecionar("SELECT * FROM CLIENTE;");
+        try {
+            while(selecao.next()){
+                System.out.println("CPF:"+selecao.getString(1)+","
+                        + "Nome:"+selecao.getString(2)+","
+                        + "E-mail:"+selecao.getString(3)+";");
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
 }

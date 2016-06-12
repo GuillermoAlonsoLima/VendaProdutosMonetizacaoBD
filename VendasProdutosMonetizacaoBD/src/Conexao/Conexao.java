@@ -1,24 +1,54 @@
 package Conexao;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+/** Conexao
+ * possui os métodos para conexao com o banco e execução de comandos sql
+ * @author Guillermo1
+ */
 public class Conexao {
-    private static Connection con;
-    public static void Conectar(){
-        try{
-            String url = "jdbc:postgresql://localhost:5432/Monetizacao",usuario = "postgres",senha = "gaat1997";
-            Class.forName("org.postgresql.Driver");
-            con = DriverManager.getConnection(url, usuario, senha);
-            System.out.println("Conexão foi um sucesso!");
-        }catch(ClassNotFoundException | SQLException ex){
-            System.out.println("Conexão falhou!");
-        }
-    };
+    private static Statement stm;
     
-    public static Connection getCon(){
-        return con;
+    /** conexao
+     * Conecta com o banco de dados e cria o statement
+     */
+    public static void conexao() {
+        try {
+            Class.forName("org.postgresql.Driver");
+            stm = DriverManager.getConnection("jdbc:postgresql://localhost:5432/Monetizacao", "postgres", "gaat1997").createStatement();
+        } catch (ClassNotFoundException | SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    /** executar
+     * Executa um comando sql
+     * @param sql comando a executar
+     */
+    public static void executar(String sql){
+        try {
+            stm.executeUpdate(sql);
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    /** selecionar
+     * retorna um set de dados selecionados no banco
+     * @param sql comando a executar
+     * @return set de dados selecionados
+     */
+    public static ResultSet selecionar(String sql){
+        try {
+            return stm.executeQuery(sql);
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
     }
     
 }
