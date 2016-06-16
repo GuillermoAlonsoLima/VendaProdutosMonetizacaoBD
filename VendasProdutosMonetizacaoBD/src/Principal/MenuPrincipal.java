@@ -7,6 +7,10 @@ package Principal;
 
 import Conexao.Conexao;
 import Menus.ClienteMenu;
+import Menus.ContaMenu;
+import Menus.ProdutoMenu;
+import Menus.VendaMenu;
+import UI.MonetizacaoUI;
 import util.Console;
 
 /** Menu Principal
@@ -35,6 +39,10 @@ public class MenuPrincipal {
                 opcao = Console.scanInt("Digite a opcao desejada:");
                 switch(opcao){
                     case 1:ClienteMenu.menu();break;
+                    case 2:ContaMenu.menu();break;
+                    case 3:ProdutoMenu.menu();break;
+                    case 4:VendaMenu.menu();break;
+                    case 6:MonetizacaoUI.logar();break;
                     case 7:System.exit(0);break;
                     default:System.out.println("Somente de 1 a 7!");break;
                 }

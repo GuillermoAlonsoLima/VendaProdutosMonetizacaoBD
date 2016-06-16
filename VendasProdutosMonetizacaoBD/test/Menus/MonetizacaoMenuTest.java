@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Verificar;
+package Menus;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -16,9 +16,9 @@ import static org.junit.Assert.*;
  *
  * @author Guillermo1
  */
-public class VerificarClienteTest {
+public class MonetizacaoMenuTest {
     
-    public VerificarClienteTest() {
+    public MonetizacaoMenuTest() {
     }
     
     @BeforeClass
@@ -38,32 +38,25 @@ public class VerificarClienteTest {
     }
 
     /**
-     * Test of verificar method, of class VerificarCliente.
+     * Test of menu method, of class MonetizacaoMenu.
      */
     @Test
-    public void testVerificar() {
-        System.out.println("verificar");
-        String coluna = "";
-        String valor = "";
-        boolean expResult = false;
-        boolean result = VerificarCliente.verificar(coluna, valor);
-        assertEquals(expResult, result);
+    public void testMenu() {
+        System.out.println("menu");
+        MonetizacaoMenu.menu();
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
     /**
-     * Test of clienteExiste method, of class VerificarCliente.
+     * Test of setConta_logada method, of class MonetizacaoMenu.
      */
     @Test
-    public void testClienteExiste() {
-        System.out.println("clienteExiste");
-        String coluna = "";
-        String valor = "";
-        boolean falar_existe = false;
-        boolean falar_nao_existe = false;
+    public void testSetConta_logada() {
+        System.out.println("setConta_logada");
+        Integer conta_logada = null;
         boolean expResult = false;
-        boolean result = VerificarCliente.clienteExiste(coluna, valor, falar_existe, falar_nao_existe);
+        boolean result = MonetizacaoMenu.setConta_logada(conta_logada);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

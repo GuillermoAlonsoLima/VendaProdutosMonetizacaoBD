@@ -7,13 +7,13 @@ package Verificar;
 
 import Conexao.Conexao;
 import java.sql.SQLException;
+import java.text.ParseException;
 
-/** Verificar Cliente
- * Possui método para verificação dos dados do cliente
+/** VerificarConta
+ * Possui método para verificação dos dados da conta
  * @author Guillermo1
  */
-public class VerificarCliente {
-
+public class VerificarConta {
     /** verificar
      * Verifica se o valor está válido
      * @param coluna tipo de validação
@@ -23,7 +23,22 @@ public class VerificarCliente {
     public static boolean verificar(String coluna,String valor){
         try{
             switch (coluna) {
-                case "cpf":                    
+                case "usuario":
+                    if(valor.isEmpty())
+                        throw new Exception("Usuario está vazio!");
+                break;
+                case "senha":
+                    if(valor.isEmpty())
+                        throw new Exception("Senha está vazia!");
+                    else if(!valor.matches(".*[a-zA-Z]+.*"))
+                        throw new Exception("Senha deve ter letras!");
+                    else if(!valor.matches(".*[0-9]+.*"))
+                        throw new Exception("Senha deve ter números!");
+                    break;
+                case "saldo":
+                    Double.parseDouble(valor);
+                    break;
+                case "cliente":
                     if(valor.isEmpty())
                         throw new Exception("CPF está vazio!");
                     else if(valor.length()!=11)
@@ -31,27 +46,11 @@ public class VerificarCliente {
                     else if(!valor.matches("[0-9]+"))
                         throw new Exception("CPF deve ter somente números!");
                     break;
-                case "nome":
-                    if(valor.isEmpty())
-                        throw new Exception("Nome está vazio!");
-                    else if(!Character.isUpperCase(valor.charAt(0)))
-                        throw new Exception("Nome deve começar em maiúsculo!");
-                    else if(valor.split("\\s+").length < 3)
-                        throw new Exception("Nome incompleto!");
-                    else if(valor.matches(".*\\d+.*"))
-                        throw new Exception("Nome não deve ter números!");
-                    break;
-                case "email":
-                    if(valor.isEmpty())
-                        throw new Exception("E-mail está vazio!");
-                    else if(!valor.matches("^(.+)@(.+)$"))
-                        throw new Exception("E-mail inválido!");
-                    else if(!valor.matches(valor.toLowerCase()))
-                        throw new Exception("Email deve estar em minúsculo!");
-                    break;
                 default:
                     throw new Exception("Coluna inválida!");
             }
+        }catch(ParseException e){
+            System.out.println("Saldo inválido");
         }catch(Exception ex){
             System.out.println(ex.getMessage());
             return false;
@@ -59,23 +58,23 @@ public class VerificarCliente {
         return true;
     }
     
-    /** clienteExiste
-     * Verifica se o Cliente existe
+    /** contaExiste
+     * Verifica se a Conta existe
      * @param valor valor a procurar
      * @param coluna coluna a procurar
      * @param falar_existe mostrar mensagem se existe
      * @param falar_nao_existe mostrar mensagem se não existe
      * @return True se existe e False se não existe
      */
-    public static boolean clienteExiste(String coluna,String valor,boolean falar_existe,boolean falar_nao_existe){
+    public static boolean contaExiste(String coluna,String valor,boolean falar_existe,boolean falar_nao_existe){
         try {
-            if(Conexao.selecionar("SELECT * FROM CLIENTE WHERE "+coluna+" = '"+valor+"';").isBeforeFirst()){
+            if(Conexao.selecionar("SELECT * FROM CONTA WHERE "+coluna+" = '"+valor+"';").isBeforeFirst()){
                 if(falar_existe == true)
-                    System.out.println("Cliente já existe!");
+                    System.out.println("Conta já existe!");
                 return true;
             }
             if(falar_nao_existe == true)
-                System.out.println("Cliente não existe");
+                System.out.println("Conta não existe");
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         }

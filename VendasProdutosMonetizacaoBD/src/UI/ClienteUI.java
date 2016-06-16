@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package UI;
 
 import DAO.ClienteDAO;
@@ -20,7 +15,7 @@ public class ClienteUI {
      */
     public static void cadastrar(){
         String cpf = Console.scanString("Digite o cpf:");
-        if(VerificarCliente.verificar("cpf", cpf) && !VerificarCliente.clienteExiste(cpf)){
+        if(VerificarCliente.verificar("cpf", cpf) && !VerificarCliente.clienteExiste("cpf",cpf,true,false)){
             String nome = Console.scanString("Digite o nome:");
             if(VerificarCliente.verificar("nome", nome)){
                 String email = Console.scanString("Digite o e-mail:");
@@ -36,7 +31,7 @@ public class ClienteUI {
     public static void deletar(){
         String coluna = Console.scanString("Coluna pelo qual deletar:");
         String valor = Console.scanString(coluna+" a deletar:");
-        if(VerificarCliente.verificar(coluna.toLowerCase(), valor))
+        if(VerificarCliente.verificar(coluna.toLowerCase(), valor) && VerificarCliente.clienteExiste(coluna,valor,false,true))
             ClienteDAO.deletar(coluna, valor);
     }
     
@@ -49,7 +44,7 @@ public class ClienteUI {
         if(VerificarCliente.verificar(coluna1, valor1)){
             String coluna2 = Console.scanString("Coluna a procurar:");
             String valor2 = Console.scanString(coluna2+" a procurar:");
-            if(VerificarCliente.verificar(coluna2, valor2))
+            if(VerificarCliente.verificar(coluna2, valor2) && VerificarCliente.clienteExiste(coluna2,valor2,false,true))
                 ClienteDAO.atualizar(coluna1, valor1, coluna2, valor2);
         }
     }

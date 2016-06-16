@@ -1,63 +1,90 @@
 package DAO;
 
 import Conexao.Conexao;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/** ContaDAO
+ * Executa comandos sql relacionados a tabela Conta.
+ * @author Guillermo1
+ */
 public class ContaDAO {
-    private static PreparedStatement stm;
-    private static final Connection CON = Conexao.getCon();
-    private static ResultSet resultado; 
+    private static ResultSet selecao;
     
-    public static void inserirConta(String usuario,double saldo,int cliente) throws SQLException{
-        stm = CON.prepareStatement("SELECT INSERIR_CONTA(?,?,?);");
-        stm.setString(1, usuario);stm.setDouble(2, saldo);stm.setInt(3, cliente);
-        stm.executeUpdate();
+    /** cadastrar
+     * Cadastra a conta
+     * @param usuario
+     * @param senha
+     * @param saldo
+     * @param cliente
+     */
+    public static void cadastrar(String usuario,String senha,String saldo,String cliente){
+        Conexao.executar("INSERT INTO CONTA(USUARIO,SENHA,SALDO,CLIENTE) VALUES('"+usuario+"','"+senha+"',"+saldo+",'"+cliente+"');");
     }
     
-    public static int verificarConta(String usuario) throws SQLException{
-        stm = CON.prepareStatement("SELECT CODIGO FROM CONTA WHERE USUARIO = ?;");
-        stm.setString(1, usuario);
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            return resultado.getInt(1);
+    /** deletar
+     * Deleta a conta
+     * @param coluna referencia para deletar
+     * @param valor valor de referencia para deletar
+     */
+    public static void deletar(String coluna,String valor){
+        Conexao.executar("DELETE FROM CONTA WHERE "+coluna+" = '"+valor+"';");
+    }
+    
+    /** atualizar
+     * atualiza a conta
+     * @param coluna1 coluna a atualizar
+     * @param valor1 novo valor da coluna
+     * @param coluna2 referencia para atualizar
+     * @param valor2 valor da referencia para atualizar
+     */
+    public static void atualizar(String coluna1,String valor1,String coluna2,String valor2){
+        Conexao.executar("UPDATE CONTA SET "+coluna1+" = '"+valor1+"' WHERE "+coluna2+" = '"+valor2+"';");
+    }    
+    
+    /** selecionar
+     * seleciona a conta
+     * @param coluna coluna a selecionar
+     * @param valor valor a selecionar
+     */
+    public static void selecionar(String coluna,String valor){
+        selecao = Conexao.selecionar("SELECT * FROM CONTA WHERE "+coluna+" = '"+valor+"';");
+        try {
+            if(!selecao.isBeforeFirst())
+                System.out.println("Conta não existe!");
+            else{
+                while(selecao.next()){
+                    System.out.println("ID:"+selecao.getInt(1)+","
+                            + "Usuario:"+selecao.getString(2)+","
+                            + "Saldo:"+selecao.getString(4)+","
+                            + "Cliente:"+selecao.getString(5)+";");
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
         }
-        return 0;
     }
     
-    public static void depositarSaldo(double saldo,int conta) throws SQLException{
-        stm = CON.prepareStatement("UPDATE CONTA SET SALDO = SALDO + ? WHERE CODIGO = ?;"
-                + "INSERT INTO CONTA_MONETIZACAO(CONTA_TRANSFERIDOR) VALUES(?);");
-        stm.setDouble(1, saldo);stm.setInt(2, conta);stm.setInt(3, conta);
-        stm.executeUpdate();
-    }
-    
-    public static void retirarSaldo(int conta,double saldo) throws SQLException{
-        stm = CON.prepareStatement("SELECT RETIRAR_SALDO(?,?);"
-                + "INSERT INTO CONTA_MONETIZACAO(CONTA_TRANSFERIDOR) VALUES(?);");
-        stm.setInt(1, conta);stm.setDouble(2, saldo);stm.setInt(3, conta);
-        stm.execute();
-    }
-    
-    public void transferirSaldo(int conta_minha,int conta_outra,double saldo) throws SQLException{
-        stm = CON.prepareStatement("SELECT RETIRAR_SALDO(?,?);"
-                + "UPDATE CONTA SET SALDO = SALDO + ? WHERE CODIGO = ?;"
-                + "INSERT INTO CONTA_MONETIZACAO VALUES(?,?);");
-        stm.setInt(1, conta_minha);stm.setDouble(2, saldo);stm.setDouble(3, saldo);stm.setInt(4, conta_outra);
-        stm.setInt(5, conta_minha);stm.setInt(6, conta_outra);
-        stm.execute();
-    }
-    
-    public Integer visualizarSaldo(int conta) throws SQLException{
-        stm = CON.prepareStatement("SELECT SALDO FROM CONTA WHERE CODIGO = ?;");
-        stm.setInt(1, conta);
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            return resultado.getInt(1);
+    /** selecionarTudo
+     * seleciona todos as contas
+     */
+    public static void selecionarTudo(){
+        selecao = Conexao.selecionar("SELECT * FROM CONTA;");
+        try {
+            if(!selecao.isBeforeFirst())
+                System.out.println("Não há contas cadastradas!");
+            else{
+                while(selecao.next()){
+                    System.out.println("ID:"+selecao.getInt(1)+","
+                            + "Usuario:"+selecao.getString(2)+","
+                            + "Saldo:"+selecao.getString(4)+","
+                            + "Cliente:"+selecao.getString(5)+";");
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
         }
-        return null;
     }
+
     
 }

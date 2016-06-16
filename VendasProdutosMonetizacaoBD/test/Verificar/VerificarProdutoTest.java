@@ -16,9 +16,9 @@ import static org.junit.Assert.*;
  *
  * @author Guillermo1
  */
-public class VerificarClienteTest {
+public class VerificarProdutoTest {
     
-    public VerificarClienteTest() {
+    public VerificarProdutoTest() {
     }
     
     @BeforeClass
@@ -38,7 +38,7 @@ public class VerificarClienteTest {
     }
 
     /**
-     * Test of verificar method, of class VerificarCliente.
+     * Test of verificar method, of class VerificarProduto.
      */
     @Test
     public void testVerificar() {
@@ -46,24 +46,24 @@ public class VerificarClienteTest {
         String coluna = "";
         String valor = "";
         boolean expResult = false;
-        boolean result = VerificarCliente.verificar(coluna, valor);
+        boolean result = VerificarProduto.verificar(coluna, valor);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
     /**
-     * Test of clienteExiste method, of class VerificarCliente.
+     * Test of produtoExiste method, of class VerificarProduto.
      */
     @Test
-    public void testClienteExiste() {
-        System.out.println("clienteExiste");
+    public void testProdutoExiste() {
+        System.out.println("produtoExiste");
         String coluna = "";
         String valor = "";
         boolean falar_existe = false;
         boolean falar_nao_existe = false;
         boolean expResult = false;
-        boolean result = VerificarCliente.clienteExiste(coluna, valor, falar_existe, falar_nao_existe);
+        boolean result = VerificarProduto.produtoExiste(coluna, valor, falar_existe, falar_nao_existe);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

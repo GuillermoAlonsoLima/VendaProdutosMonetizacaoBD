@@ -18,11 +18,7 @@ public class ClienteDAO {
      * @param email
      */
     public static void cadastrar(String cpf,String nome,String email){
-        try{
-            Conexao.executar("INSERT INTO CLIENTE VALUES('"+cpf+"','"+nome+"','"+email+"');");
-        }catch(Exception ex){
-            System.out.println("Cliente já existe!");
-        }
+        Conexao.executar("INSERT INTO CLIENTE VALUES("+cpf+",'"+nome+"','"+email+"');");
     }
     
     /** deletar
@@ -31,7 +27,7 @@ public class ClienteDAO {
      * @param valor valor de referencia para deletar
      */
     public static void deletar(String coluna,String valor){
-        Conexao.executar("DELETE FROM CLIENTE WHERE "+coluna+" = '"+valor+"';");
+        Conexao.executar("DELETE FROM CLIENTE WHERE "+coluna+" = '"+valor+"';");        
     }
     
     /** atualizar
@@ -53,10 +49,14 @@ public class ClienteDAO {
     public static void selecionar(String coluna,String valor){
         selecao = Conexao.selecionar("SELECT * FROM CLIENTE WHERE "+coluna+" = '"+valor+"';");
         try {
-            while(selecao.next()){
-                System.out.println("CPF:"+selecao.getString(1)+","
-                        + "Nome:"+selecao.getString(2)+","
-                        + "E-mail:"+selecao.getString(3)+";");
+            if(!selecao.isBeforeFirst())
+                System.out.println("Cliente não existe!");
+            else{
+                while(selecao.next()){
+                    System.out.println("CPF:"+selecao.getString(1)+","
+                            + "Nome:"+selecao.getString(2)+","
+                            + "E-mail:"+selecao.getString(3)+";");
+                }
             }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
@@ -69,10 +69,14 @@ public class ClienteDAO {
     public static void selecionarTudo(){
         selecao = Conexao.selecionar("SELECT * FROM CLIENTE;");
         try {
-            while(selecao.next()){
-                System.out.println("CPF:"+selecao.getString(1)+","
-                        + "Nome:"+selecao.getString(2)+","
-                        + "E-mail:"+selecao.getString(3)+";");
+            if(!selecao.isBeforeFirst())
+                System.out.println("Não há clientes cadastrados!");
+            else{
+                while(selecao.next()){
+                    System.out.println("CPF:"+selecao.getString(1)+","
+                            + "Nome:"+selecao.getString(2)+","
+                            + "E-mail:"+selecao.getString(3)+";");
+                }
             }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());

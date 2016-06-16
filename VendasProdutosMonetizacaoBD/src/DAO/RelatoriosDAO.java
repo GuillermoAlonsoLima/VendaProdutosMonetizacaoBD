@@ -1,175 +1,129 @@
 package DAO;
 
 import Conexao.Conexao;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import Util.DateUtil;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/** RelatoriosDAO
+ * Possui relatorios
+ * @author Guillermo1
+ */
 public class RelatoriosDAO {
-    private static PreparedStatement stm;
-    private static final Connection CON = Conexao.getCon();
-    private static ResultSet resultado,resultado2; 
-    
-    public static void produtosVendidos() throws SQLException{
-        stm = CON.prepareStatement("SELECT P.NOME,V.DATA_VENDA,C.USUARIO FROM VENDAS_PRODUTOS VP"
-                + "JOIN PRODUTO P ON VP.PRODUTO = P.CODIGO"
-                + "JOIN VENDA V ON VP.VENDA = V.CODIGO"
-                + "JOIN CONTA C ON V.COMPRADOR = C.CODIGO;");
-        resultado = stm.executeQuery();        
-        while(resultado.next()){
-            System.out.println("Produto:"+resultado.getString(1)+","
-                    + "Data da Venda:"+resultado.getString(2)+","
-                    + "Comprador:"+resultado.getString(3)+";");
+    private static ResultSet selecao;
+
+    /** produtosVendidos
+     * mostra os produtos já vendidos
+     */
+    public static void produtosVendidos(){
+        Conexao.selecionar("SELECT P.*,SUM(PV.QTD) FROM PRODUTO P"
+                + "JOIN PRODUTO_VENDA PV ON PV.PRODUTO = P.ID"
+                + "GROUP BY P.ID"
+                + "ORDER BY SUM(P.QTD) DESC;");
+        try {
+            if(!selecao.isBeforeFirst())
+                System.out.println("Nenhum produto foi vendido!");
+            else{
+                while(selecao.next()){
+                    System.out.println("ID:"+selecao.getInt(1)+","
+                                + "Nome:"+selecao.getString(2)+","
+                                + "Preço:"+selecao.getDouble(3)+""
+                                + "Quantidade:"+selecao.getInt(4)+";");
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
         }
     }
     
-    public static void comprasCliente(String cliente) throws SQLException{
-        stm = CON.prepareStatement("SELECT P.*,V.DATA_VENDA FROM CLIENTE CL"
-                + "JOIN CONTA CO ON CO.CLIENTE = CL.CPF AND CL.NOME = ?"
-                + "JOIN VENDA V ON V.CONTA = CO.CODIGO"
-                + "JOIN VENDAS_PRODUTOS VP ON VP.VENDA = V.CODIGO"
-                + "JOIN PRODUTO P ON P.CODIGO = VP.PRODUTO;");
-        stm.setString(1, cliente);
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("Código:"+resultado.getInt(1)+","
-                    + "Nome:"+resultado.getString(2)+","
-                    + "Preço:"+resultado.getDouble(3)+","
-                    + "Data da Venda:"+resultado.getString(5)+";");
+    /** comprasConta
+     * compras que a conta executou
+     * @param conta conta que executou as compras
+     */
+    public static void comprasConta(String conta){
+        selecao = Conexao.selecionar("SELECT ID FROM CONTA WHERE USUARIO = '"+conta+"';");
+        ResultSet selecao_venda,selecao_produtos;
+        try {
+            while(selecao.next()){
+                selecao_venda = Conexao.selecionar("SELECT * FROM VENDA WHERE CONTA = "+selecao.getInt(1)+";"); 
+                if(!selecao_venda.isBeforeFirst())
+                    System.out.println(conta+" não fez nenhuma compra ainda!");
+                else{
+                    while(selecao_venda.next()){
+                        System.out.println("ID:"+selecao_venda.getInt(1)+","
+                            + "Data e Hora:"+DateUtil.dateHourToString(selecao_venda.getDate(2))+","
+                            + "Conta:"+conta+";");
+                        System.out.println("Produtos:");
+                        selecao_produtos = Conexao.selecionar("SELECT P.* FROM PRODUTO P"
+                                + "JOIN PRODUTO_VENDA PV ON PV.PRODUTO = P.ID"
+                                + "JOIN VENDA V ON V.ID = PV.VENDA AND V.ID = "+selecao_venda.getInt(1));
+                        while(selecao_produtos.next()){
+                            System.out.println("ID:"+selecao_produtos.getInt(1)+","
+                            + "Nome:"+selecao_produtos.getString(2)+","
+                            + "Preço:"+selecao_produtos.getDouble(3)+";");
+                        }
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
         }
     }
     
-    public static void comprasConta(String conta) throws SQLException{
-        stm = CON.prepareStatement("SELECT P.*,V.DATA_VENDA FROM CONTA CO"
-                + "JOIN VENDA V ON V.COMPRADOR = CO.CODIGO AND CO.NOME = ?"
-                + "JOIN VENDAS_PRODUTOS VP ON VP.VENDA = V.CODIGO"
-                + "JOIN PRODUTO P ON P.CODIGO = VP.PRODUTO;");
-        stm.setString(1, conta);
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("Código:"+resultado.getInt(1)+","
-                    + "Nome:"+resultado.getString(2)+","
-                    + "Preço:"+resultado.getDouble(3)+","
-                    + "Data da Venda:"+resultado.getString(5)+";");
+    /** contaMaisCompra
+     * Mostra as contas que mais compram em ordem decrescente
+     */
+    public static void contaMaisCompra(){
+        selecao = Conexao.selecionar("SELECT C.*,COUNT(V.ID) FROM CONTA C"
+                + "JOIN VENDA V ON C.ID = V.CONTA"
+                + "GROUP BY C.ID"
+                + "ORDER BY COUNT(V.ID) DESC;");
+        try {
+            if(!selecao.isBeforeFirst())
+                System.out.println("Não há contas cadastradas!");
+            else{
+                while(selecao.next()){
+                    System.out.println("ID:"+selecao.getInt(1)+","
+                            + "Usuario:"+selecao.getString(2)+","
+                            + "Saldo:"+selecao.getString(4)+","
+                            + "Cliente:"+selecao.getString(5)+","
+                            + "Quantidadede Compras:"+selecao.getInt(6)+";");
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
         }
     }
     
-    public static void clientesMaisCompram() throws SQLException{
-        stm = CON.prepareStatement("SELECT CL.NOME,COUNT(VP.VENDA) FROM CLIENTE CL"
-                + "JOIN CONTA CO ON CO.CLIENTE = CL.CPF"
-                + "JOIN VENDA V ON V.COMPRADOR = CO.CODIGO"
-                + "JOIN VENDAS_PRODUTOS VP ON VP.VENDA = V.CODIGO"
-                + "GROUP BY CL.NOME"
-                + "ORDER BY COUNT(VP.VENDA) DESC;");
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("Cliente:"+resultado.getString(1)+","
-                    + "Numero de Compras:"+resultado.getInt(2)+";");
+    /** contaMaisMonetiza
+     * conta que mais monetiza
+     */
+    public static void contaMaisMonetiza(){
+        selecao = Conexao.selecionar("SELECT C.*,COUNT(M.CONTA),SUM(M.VALOR),DEPOSITO,VALOR_DEPOSITO,RETIRO,VALOR_RETIRO FROM CONTA C"
+                + "JOIN MONETIZACAO M ON C.ID = M.CONTA"
+                + "JOIN (SELECT COUNT(M.CONTA) AS 'DEPOSITO',M.CONTA AS 'CONTAS_D',SUM(VALOR) AS 'VALOR_DEPOSITO' FROM MONETIZACAO M WHERE M.TIPO = TRUE GROUP BY CONTAS_D) ON CONTAS_D = C.ID"
+                + "JOIN (SELECT COUNT(M.CONTA) AS 'RETIRO',M.CONTA AS 'CONTAS_R',SUM(VALOR) AS 'VALOR_RETIRO' FROM MONETIZACAO M WHERE M.TIPO = FALSE GROUP BY CONTAS_R) ON CONTAS_R = C.ID"
+                + "GROUP BY C.ID"
+                + "ORDER BY COUNT(M.CONTA) DESC;");
+        try {
+            if(!selecao.isBeforeFirst())
+                System.out.println("Não há contas cadastradas!");
+            else{
+                while(selecao.next()){
+                    System.out.println("ID:"+selecao.getInt(1)+","
+                            + "Usuario:"+selecao.getString(2)+","
+                            + "Saldo:"+selecao.getString(4)+","
+                            + "Cliente:"+selecao.getString(5)+","
+                            + "Monetizações:"+selecao.getInt(6)+","
+                            + "Valores Totais:"+selecao.getDouble(7)+","
+                            + "Depositos:"+selecao.getInt(8)+","
+                            + "Valor depositado:"+selecao.getDouble(9)+","
+                            + "Retiros:"+selecao.getInt(10)+","
+                            + "Valor retirado:"+selecao.getDouble(11)+";");
+                }
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
         }
     }
-    
-    public static void clientesMaisMonetizam() throws SQLException{
-        stm = CON.prepareStatement("SELECT CL.NOME,COUNT(CM.CONTA_TRANSFERIDOR) FROM CLIENTE CL"
-                + "JOIN CONTA CO ON CO.CLIENTE = CL.CPF"
-                + "JOIN CONTA_MONETIZACAO CM ON CO.CODIGO = CM.CONTA_TRANSFERIDOR"
-                + "GROUP BY CL.NOME"
-                + "ORDER BY COUNT(CM.CONTA_TRANSFERIDOR) DESC;");
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("Cliente:"+resultado.getString(1)+","
-                    + "Monetizações:"+resultado.getInt(2)+";");
-        }
-    }
-    
-    public static void contasMaisCompram() throws SQLException{
-        stm = CON.prepareStatement("SELECT CO.NOME,CL.NOME,COUNT(VP.VENDA) FROM CLIENTE CL"
-                + "JOIN CONTA CO ON CO.CLIENTE = CL.CPF"
-                + "JOIN VENDA V ON V.COMPRADOR = CO.CODIGO"
-                + "JOIN VENDAS_PRODUTOS VP ON VP.VENDA = V.CODIGO"
-                + "GROUP BY CO.NOME"
-                + "ORDER BY COUNT(VP.VENDA) DESC;");
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("Conta:"+resultado.getString(1)+","
-                    + "Cliente"+resultado.getString(2)+","
-                    + "Numero de Compras:"+resultado.getInt(3)+";");
-        }
-    }
-    
-    public static void contasMaisMonetizam() throws SQLException{
-        stm = CON.prepareStatement("SELECT CO.NOME,CL.NOME,COUNT(CM.CONTA_TRANSFERIDOR) FROM CLIENTE CL"
-                + "JOIN CONTA CO ON CO.CLIENTE = CL.CPF"
-                + "JOIN CONTA_MONETIZACAO CM ON CO.CODIGO = CM.CONTA_TRANSFERIDOR"
-                + "GROUP BY CO.NOME"
-                + "ORDER BY COUNT(CM.CONTA_TRANSFERIDOR) DESC;");
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("Conta:"+resultado.getString(1)+","
-                    + "Cliente"+resultado.getString(2)+","
-                    + "Monetizações:"+resultado.getInt(3)+";");
-        }
-    }
-    
-    public static void clientes() throws SQLException{
-        stm = CON.prepareStatement("SELECT * FROM CLIENTES;");
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("CPF:"+resultado.getString(1)+","
-                    + "Nome:"+resultado.getString(2)+","
-                    + "E-mail:"+resultado.getString(3)+";");
-        }
-    }
-    
-    public static void contas() throws SQLException{
-        stm = CON.prepareStatement("SELECT CO.*,CL.NOME FROM CONTAS CO"
-                + "JOIN CLIENTE ON CL.CPF = CO.CLIENTE;");
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("Código:"+resultado.getInt(1)+","
-                    + "Usuário:"+resultado.getString(2)+","
-                    + "Saldo:"+resultado.getDouble(3)+","
-                    + "Cliente:"+resultado.getString(5)+";");
-        }
-    }
-    
-    public static void produtos() throws SQLException{
-        stm = CON.prepareStatement("SELECT * FROM PRODUTO;");
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("Código:"+resultado.getInt(1)+","
-                    + "Nome:"+resultado.getString(2)+","
-                    + "Preço:"+resultado.getDouble(3)+","
-                    + "Quantidade:"+resultado.getInt(4)+";");
-        }
-    }
-    
-    public static void vendas() throws SQLException{
-        int venda = 1;
-        stm = CON.prepareStatement("SELECT * FROM VENDAS V"
-                + "JOIN CONTA C ON C.CODIGO = V.COMPRADOR;");
-        resultado = stm.executeQuery();
-        while(resultado.next()){
-            System.out.println("Código:"+resultado.getInt(1)+","
-                    + "Valor:"+resultado.getDouble(2)+","
-                    + "Data:"+resultado.getString(3)+";");
-            produtosVenda(venda);
-            venda++;
-        }
-    }
-    
-    public static void produtosVenda(int venda) throws SQLException{
-        System.out.println("Produtos:");
-        stm = CON.prepareStatement("SELECT P.CODIGO,P.NOME,P.PRECO FROM PRODUTO P"
-                + "JOIN VENDAS_PRODUTOS VP ON P.CODIGO = VP.PRODUTO AND VP.VENDA = ?;");
-        stm.setInt(1, venda);
-        resultado2 = stm.executeQuery();
-        while(resultado2.next()){
-            System.out.println("Código:"+resultado2.getInt(1)+","
-                    + "Nome:"+resultado2.getString(2)+","
-                    + "Preço:"+resultado2.getDouble(3)+";");
-        }
-        System.out.println("");
-    }
-    
 }
